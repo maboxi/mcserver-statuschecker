@@ -2,25 +2,23 @@ use anyhow::Result;
 use log::debug;
 
 mod utility;
-use crate::utility::args::parse_args;
-use crate::utility::init_logging;
-
 mod config;
-use crate::config::load_config;
-
 mod api;
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    init_logging();
+    utility::init_logging();
 
-    let args = parse_args()?;
+    let args = utility::args::parse_args()?;
 
-    let config = load_config(&args.config_path)?;
+    let config = config::load_config(&args.config_path)?;
 
     debug!("Loaded configuration: \n{:#?}", config);
 
-    api::start_service(config).await?;
+    let app_state = api::create_app_state_from_config(config);
+
+
+    api::start_service(app_state).await?;
 
    Ok(())
 }

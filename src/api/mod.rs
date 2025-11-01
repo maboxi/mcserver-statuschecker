@@ -10,8 +10,13 @@ use crate::{api::appstate::AppState, config};
 pub mod appstate;
 pub mod service;
 
-pub async fn start_service(config: config::Config) -> Result<()> {
-    let app_state = Arc::new(AppState::from(config.clone()));
+pub type SharedAppState = Arc<AppState>;
+
+pub fn create_app_state_from_config(config: config::Config) -> SharedAppState {
+    Arc::new(AppState::from(config))
+}
+
+pub async fn start_service(app_state: SharedAppState) -> Result<()> {
 
     debug!("App state deduced from config: \n{:#?}", app_state);
 
@@ -27,7 +32,7 @@ pub async fn start_service(config: config::Config) -> Result<()> {
             .allow_headers([CONTENT_TYPE])
         );
 
-    let listener = TcpListener::bind(format!("0.0.0.0:{}", config.port)).await?;
+    let listener = TcpListener::bind(format!("0.0.0.0:{}", app_state.config.port)).await?;
 
     axum::serve(listener, router).await?;
     Ok(())
