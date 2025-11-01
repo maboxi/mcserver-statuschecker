@@ -8,6 +8,7 @@ Endpoint ```/api```:
 
 Endpoint ```/api/servers/<server id>```
 - ```./status```: Query server status information
+- ```./code```: Show server code based on HTTP return code
 - ```./icon```: Query the server's icon
 
 ## Configuration
