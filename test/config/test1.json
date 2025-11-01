@@ -1,0 +1,15 @@
+{
+    "servers": [
+        {
+            "name": "Local",
+            "id": "local",
+            "host": "localhost",
+            "port": 25566
+        },
+        {
+            "name": "GTNH Together 2.0",
+            "id": "gtnhtogether2",
+            "host": "mc.supremeprojekt.de"
+        }
+    ]
+}
