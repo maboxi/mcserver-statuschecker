@@ -10,7 +10,12 @@ const DEFAULT_API_PORT: u16 = 9235;
 pub struct Config {
     pub servers: Vec<ServerConfig>,
     #[serde(default = "defaults::default_api_port")]
-    pub port: u16
+    pub port: u16,
+    #[serde(default = "defaults::default_polling_interval_seconds")]
+    pub polling_interval_seconds: u64,
+    #[serde(default = "defaults::default_query_timeout_milliseconds")]
+    pub query_timeout_milliseconds: u64,
+    pub favicon_save_path: Option<String>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -34,6 +39,14 @@ mod defaults {
 
     pub fn default_server_port() -> u16 {
         DEFAULT_SERVER_PORT
+    }
+
+    pub fn default_polling_interval_seconds() -> u64 {
+        60
+    }
+
+    pub fn default_query_timeout_milliseconds() -> u64 {
+        100
     }
 
     pub fn default_api_port() -> u16 {
