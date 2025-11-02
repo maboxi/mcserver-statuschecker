@@ -24,6 +24,8 @@ async fn tokio_main() -> Result<()> {
 
     let app_state = api::create_app_state_from_config(config);
 
+    debug!("Starting updater task...");
+    updater::run_as_task(&app_state);
 
     debug!("Starting API service...");
     api::start_service(app_state).await?;
