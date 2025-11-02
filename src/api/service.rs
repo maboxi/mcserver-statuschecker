@@ -28,7 +28,7 @@ pub async fn get_server_status_returncode(State(state): State<Arc<AppState>>, Pa
     if let Some(server_info) = state.servers.get(&server_id) {
         let status = match &*server_info.state.read().unwrap() {
             ServerState::Online(_) => axum::http::StatusCode::OK,
-            ServerState::Offline(_) => axum::http::StatusCode::SERVICE_UNAVAILABLE,
+            ServerState::Offline => axum::http::StatusCode::SERVICE_UNAVAILABLE,
             ServerState::Unreachable => axum::http::StatusCode::BAD_GATEWAY,
         };
         (status, "".into())

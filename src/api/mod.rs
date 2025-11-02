@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use anyhow::Result;
 use axum::{Router, http::{Method, header::CONTENT_TYPE}, routing::get};
-use log::debug;
+use log::{debug, info};
 use tokio::net::TcpListener;
 use tower_http::cors::CorsLayer;
 use crate::{api::appstate::AppState, config};
@@ -33,6 +33,8 @@ pub async fn start_service(app_state: SharedAppState) -> Result<()> {
         );
 
     let listener = TcpListener::bind(format!("0.0.0.0:{}", app_state.config.port)).await?;
+
+    info!("API service listening on port {}", app_state.config.port);
 
     axum::serve(listener, router).await?;
     Ok(())

@@ -15,17 +15,21 @@ pub type ServerStatusList = HashMap<String, ServerStatus>;
 #[derive(Debug)]
 pub struct ServerStatus {
     pub state: RwLock<ServerState>,
+
+    pub favicon_path: RwLock<Option<String>>,
+
     pub config: ServerConfig,
+    pub address: String,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, PartialEq)]
 pub enum ServerState {
     Online(PlayersInfo),
-    Offline(PlayersInfo),
+    Offline,
     Unreachable
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, PartialEq)]
 pub struct PlayersInfo {
     pub online: u32,
     pub max: u32,
@@ -42,7 +46,9 @@ impl From<Config> for AppState {
         let servers = config.servers.iter().map(|server| {
             (server.id.clone(), ServerStatus {
                 state: RwLock::new(ServerState::default()),
-                config: server.clone()
+                favicon_path: RwLock::new(None),
+                config: server.clone(),
+                address: format!("{}:{}", server.host, server.port),
             })
         }).collect::<ServerStatusList>();
         Self {
