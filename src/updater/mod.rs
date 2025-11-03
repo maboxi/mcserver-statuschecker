@@ -2,6 +2,7 @@ use std::{path::Path, time::Duration};
 
 use anyhow::Result;
 use axum::routing::trace;
+use base64::Engine;
 use log::{debug, trace, warn};
 use mc_server_status::{McClient, ServerEdition};
 use crate::api::{SharedAppState, appstate::{PlayersInfo, ServerState, ServerStatus}};
@@ -70,10 +71,11 @@ async fn update_server_status(server_state: &ServerStatus, client: &McClient, fa
                 let favicon_path = save_path.join(format!("{}.png", server_state.config.id));
                 let favicon_write_result =  match &server_info.data {
                     mc_server_status::ServerData::Java(java_status) => {
-                        if let Some(favicon_path_str) = favicon_path.to_str() {
-                            java_status.save_favicon(favicon_path_str)
+                        java_status.favicon.as_ref().inspect(|favicon_str| debug!("Favicon content of server {}: {:?}", server_state.config.id, favicon_str));
+                        if let Some(favicon_str) = &java_status.favicon {
+                            save_favicon(&favicon_path, favicon_str)
                         } else {
-                            Err(mc_server_status::McError::IoError(std::io::Error::new(std::io::ErrorKind::InvalidInput, "Invalid favicon path")))
+                            Err(anyhow::anyhow!("No favicon data available"))
                         }
                     },
                     mc_server_status::ServerData::Bedrock(_bedrock_status) => todo!("Bedrock favicon handling not implemented"),
@@ -93,5 +95,17 @@ async fn update_server_status(server_state: &ServerStatus, client: &McClient, fa
     }
     trace!("Updated status for server {}", server_state.config.name);
 
+    Ok(())
+}
+
+fn save_favicon(path: &Path, favicon_data: &str) -> Result<()> {
+    let data = favicon_data.split(',').nth(1).unwrap_or(favicon_data);
+    let data = data.replace("\n", "");
+
+    trace!("Favicon data: {}", data);
+
+    let decoded_data = base64::engine::general_purpose::STANDARD.decode(data)?;
+
+    std::fs::write(path, decoded_data)?;
     Ok(())
 }
