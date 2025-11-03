@@ -67,17 +67,31 @@ async fn update_server_status(server_state: &ServerStatus, client: &McClient, fa
 
         if server_state.favicon_path.read().unwrap().is_none() {
             if let Some(save_path) = favicon_save_path {
-                let favicon_path = format!("{}/{}", save_path.display(), server_state.config.id);
-                trace!("Saving favicon for server {} to file {}...", server_state.config.name, favicon_path);
-                match &server_info.data {
-                    mc_server_status::ServerData::Java(java_status) => java_status.save_favicon(&favicon_path)?,
+                let favicon_path = save_path.join(format!("{}.png", server_state.config.id));
+                let favicon_write_result =  match &server_info.data {
+                    mc_server_status::ServerData::Java(java_status) => {
+                        if let Some(favicon_path_str) = favicon_path.to_str() {
+                            java_status.save_favicon(favicon_path_str)
+                        } else {
+                            Err(mc_server_status::McError::IoError(std::io::Error::new(std::io::ErrorKind::InvalidInput, "Invalid favicon path")))
+                        }
+                    },
                     mc_server_status::ServerData::Bedrock(_bedrock_status) => todo!("Bedrock favicon handling not implemented"),
+                };
+                
+                match favicon_write_result {
+                    Ok(()) => {
+                        debug!("Favicon for server {} saved to file {:?}", server_state.config.name, favicon_path);
+                        *server_state.favicon_path.write().unwrap() = Some(favicon_path.to_str().unwrap().to_string());
+                    }
+                    Err(err) => {
+                        warn!("Failed to save favicon for server {} to file {:?}: {}", server_state.config.name, favicon_path, err);
+                    }
                 }
-                *server_state.favicon_path.write().unwrap() = Some(favicon_path);
             }
         }
     }
-    debug!("Updated status for server {}", server_state.config.name);
+    trace!("Updated status for server {}", server_state.config.name);
 
     Ok(())
 }
