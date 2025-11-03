@@ -5,6 +5,8 @@ use serde::{Deserialize, Serialize};
 
 const DEFAULT_SERVER_PORT: u16 = 25565;
 const DEFAULT_API_PORT: u16 = 9235;
+const DEFAULT_POLLING_INTERVAL_SECONDS: u64 = 60;
+const DEFAULT_QUERY_TIMEOUT_MILLISECONDS: u64 = 100;
 
 #[derive(Deserialize, Debug, Clone)]
 pub struct Config {
@@ -30,23 +32,24 @@ pub struct ServerConfig {
 
 pub fn load_config(path: &Path) -> Result<Config> {
     let filehandle = File::open(path)?;
-    let appstate = serde_json::from_reader(filehandle)?;
-    Ok(appstate)
+    let mut config: Config = serde_json::from_reader(filehandle)?;
+    
+    config.favicon_save_path.as_mut().map(|path| std::fs::canonicalize(path));
+
+    Ok(config)
 }
 
 mod defaults {
-    use crate::config::DEFAULT_SERVER_PORT;
-
     pub fn default_server_port() -> u16 {
-        DEFAULT_SERVER_PORT
+        super::DEFAULT_SERVER_PORT
     }
 
     pub fn default_polling_interval_seconds() -> u64 {
-        60
+        super::DEFAULT_POLLING_INTERVAL_SECONDS
     }
 
     pub fn default_query_timeout_milliseconds() -> u64 {
-        100
+        super::DEFAULT_QUERY_TIMEOUT_MILLISECONDS
     }
 
     pub fn default_api_port() -> u16 {
