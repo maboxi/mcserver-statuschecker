@@ -1,0 +1,22 @@
+{
+    "favicon_save_path": "./favicons",
+    "query_timeout_milliseconds": 500,
+    "servers": [
+        {
+            "name": "Local",
+            "id": "localhost",
+            "host": "localhost",
+            "port": 25566
+        },
+        {
+            "name": "GTNH Together 2.0",
+            "id": "gtnhtogether2",
+            "host": "mc.supremeprojekt.de"
+        },
+        {
+            "name": "Hypixel",
+            "id": "hypixel",
+            "host": "mc.hypixel.net"
+        }
+    ]
+}
